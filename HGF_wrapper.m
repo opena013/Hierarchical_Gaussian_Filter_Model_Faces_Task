@@ -16,8 +16,10 @@ if ispc
     elseif experiment_mode == "mturk"
         subject = 'AM0JKZVOEOTMA';   % Mturk Subject ID (others AM0JKZVOEOTMA, A1IZ4NX41GKU4X, A1Q7VWUBIJOK17)
     elseif experiment_mode == "prolific"
-        subject = '5590a34cfdf99b729d4f69dc'; %  5590a34cfdf99b729d4f69dc or 55bcd160fdf99b1c4e4ae632 or 6556a01177d7a552a0819714 or 65f335ba737e19c6aad352aa or 6682adb6c4cc2cb1c1fc7f58
+        subject = '66645eff20ea0a1d14a3d5bb'; %  5590a34cfdf99b729d4f69dc or 55bcd160fdf99b1c4e4ae632 or 6556a01177d7a552a0819714 or 65f335ba737e19c6aad352aa or 6682adb6c4cc2cb1c1fc7f58
     end
+    perception_model = 'tapas_hgf_binary_config';       
+    observation_model = 'tapas_condhalluc_obs2_config_CMG'; %tapas_unitsq_sgm_config or tapas_condhalluc_obs2_config_CMG
 
 elseif isunix 
     root = '/media/labs/';
@@ -29,11 +31,14 @@ elseif isunix
   %  cb = getenv('COUNTERBALANCE');
     experiment_mode = getenv('EXPERIMENT');
     show_plot = false;
+    
+    perception_model = getenv('PERCEPTION_MODEL');
+    observation_model = getenv('OBSERVATION_MODEL');
+    
 end
 
-
-perception_model = 'tapas_hgf_binary_config';       
-observation_model = 'tapas_condhalluc_obs2_config_CMG';
+perception_model
+observation_model
 
 
 addpath('./HGF/')
@@ -108,8 +113,12 @@ for k=1:length(index_array)
 
             [x, file_table] = hgf_function(str_run, raw, rt_model, p_or_r, cb, experiment_mode,perception_model,observation_model);
             if show_plot
-                %tapas_hgf_binary_plotTraj(x)
-                tapas_hgf_binary_condhalluc_plotTraj(x)
+                if strcmp(observation_model,'tapas_condhalluc_obs2_config_CMG')
+                     tapas_hgf_binary_condhalluc_plotTraj(x)
+                else
+                     tapas_hgf_binary_plotTraj(x)
+                end
+
             end
             if experiment_mode == "mturk" | experiment_mode == "prolific"
                 resp_index = find(file_table.event_type==6)+1;
@@ -157,6 +166,8 @@ for k=1:length(index_array)
 
                 sub_table.ID = subject;
                 sub_table.run = run;
+                sub_table.perception_model = perception_model;
+                sub_table.observation_model = observation_model;
                 % MODEL-BASED
                 sub_table.mu_initial_2 = x.p_prc.mu_0(2);
                 sub_table.mu_initial_3 = x.p_prc.mu_0(3);
@@ -304,7 +315,7 @@ for k=1:length(index_array)
             
            
 
-           save([res_dir '/output_' model '_' 'cb' cb '_' subject], 'sub_table');
+           %save([res_dir '/output_' model '_' 'cb' cb '_' subject], 'sub_table');
            writetable(struct2table(sub_table), [res_dir '/faces_' subject '_T' num2str(run) '_cb' cb '_' model '_' p_or_r '_fits.csv'])
            saveas(gcf, [res_dir '/faces_' subject '_T' num2str(run) '_cb' cb '_' model '_' p_or_r '_image.png']);
            clear all; close all;
