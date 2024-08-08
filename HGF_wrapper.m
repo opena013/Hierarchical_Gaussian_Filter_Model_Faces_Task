@@ -16,10 +16,10 @@ if ispc
     elseif experiment_mode == "mturk"
         subject = 'AM0JKZVOEOTMA';   % Mturk Subject ID (others AM0JKZVOEOTMA, A1IZ4NX41GKU4X, A1Q7VWUBIJOK17)
     elseif experiment_mode == "prolific"
-        subject = '66645eff20ea0a1d14a3d5bb'; %  5590a34cfdf99b729d4f69dc or 55bcd160fdf99b1c4e4ae632 or 6556a01177d7a552a0819714 or 65f335ba737e19c6aad352aa or 6682adb6c4cc2cb1c1fc7f58
+        subject = '5590a34cfdf99b729d4f69dc'; %  5590a34cfdf99b729d4f69dc or 55bcd160fdf99b1c4e4ae632 or 6556a01177d7a552a0819714 or 65f335ba737e19c6aad352aa or 6682adb6c4cc2cb1c1fc7f58
     end
     perception_model = 'tapas_hgf_binary_config';       
-    observation_model = 'tapas_condhalluc_obs2_config_CMG'; %tapas_unitsq_sgm_config or tapas_condhalluc_obs2_config_CMG
+    observation_model = 'tapas_unitsq_sgm_config'; %tapas_unitsq_sgm_config or tapas_condhalluc_obs2_config_CMG
 
 elseif isunix 
     root = '/media/labs/';
@@ -144,7 +144,7 @@ for k=1:length(index_array)
 
             end
             if rt_model
-                model = 'rt-HGF';
+                %model = 'rt-HGF';
 
                 sub_table.ID = subject;
                 sub_table.run = run;
@@ -162,7 +162,7 @@ for k=1:length(index_array)
                 sub_table.LME = x.optim.LME;
 
             else
-                model = 'binary-HGF';
+                %model = 'binary-HGF';
 
                 sub_table.ID = subject;
                 sub_table.run = run;
@@ -184,6 +184,8 @@ for k=1:length(index_array)
                 elseif strcmp(observation_model,'tapas_condhalluc_obs2_config') || strcmp(observation_model,'tapas_condhalluc_obs2_config_CMG')
                     sub_table.h_intensity_sal = x.p_obs.h_intensity_sal;
                     sub_table.l_intensity_conf = x.p_obs.l_intensity_conf;
+                    sub_table.be = x.p_obs.be;
+                    sub_table.nu = x.p_obs.nu;               
                 end
                 
                 
@@ -212,7 +214,7 @@ for k=1:length(index_array)
             
             
             sub_table.has_practice_effects = has_practice_effects;
-            sub_table.model = model;
+            %sub_table.model = model;
             sub_table.p_or_r = p_or_r;
             sub_table.cor_trials =  sum(strcmp(resp_table.result, 'correct'));
             
@@ -255,6 +257,12 @@ for k=1:length(index_array)
             
 
             % REACTION TIMES
+            
+            %% IMPUTE RTs of .800 FOR MISSED TRIALS
+            
+            resp_table.response_time(isnan(resp_table.response_time)) = 0.800;
+            
+            
             resp_table.response_time = str2double(resp_table.response_time);
             sub_table.rt_sad_high_expected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high')));
             sub_table.rt_sad_high_expected_low_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high')));

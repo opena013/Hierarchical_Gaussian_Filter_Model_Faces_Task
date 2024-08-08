@@ -1,4 +1,4 @@
-function c = tapas_condhalluc_obs2_config
+function c = tapas_condhalluc_obs2_config_CMG
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Contains the configuration for the response model used to analyze data from conditioned

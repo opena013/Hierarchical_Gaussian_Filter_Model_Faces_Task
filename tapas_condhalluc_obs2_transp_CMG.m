@@ -1,4 +1,4 @@
-function [pvec, pstruct] = tapas_condhalluc_obs2_transp(r, ptrans)
+function [pvec, pstruct] = tapas_condhalluc_obs2_transp_CMG(r, ptrans)
 % --------------------------------------------------------------------------------------------------
 % Copyright (C) 2016 Christoph Mathys, TNU, UZH & ETHZ
 %

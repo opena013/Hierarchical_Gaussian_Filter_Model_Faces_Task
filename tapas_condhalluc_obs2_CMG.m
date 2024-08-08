@@ -1,4 +1,4 @@
-function [logp, yhat, res] = tapas_condhalluc_obs2(r, infStates, ptrans)
+function [logp, yhat, res] = tapas_condhalluc_obs2_CMG(r, infStates, ptrans)
 % Calculates the log-probability of response y=1 under the unit-square sigmoid model
 % Modified by Carter Goldman to include two extra parameters
 % (bounded_h_intensity_sal_mu and bounded_l_intensity_conf_mu) that
@@ -60,7 +60,8 @@ x = mu1hat + 1/(1 + nu)*(tp - mu1hat);
 % Calculate log-probabilities for non-irregular trials
 reg = ~ismember(1:n,r.irr);
 logp(reg) = -log(1+exp(-be.*(2.*x-1).*(2.*y-1)));
-yhat(reg) = x;
+%yhat(reg) = x;
+yhat(reg) = exp(logp(reg)); % could equivalently do (1+exp(-be.*(2.*x-1).*(2.*y-1))).^-1; to get average action prob
 res(reg) = (y-x)./sqrt(x.*(1-x));
 
 return;

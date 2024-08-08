@@ -29,7 +29,7 @@ x(r.irr) = [];
 % Calculate log-probabilities for non-irregular trials
 reg = ~ismember(1:n,r.irr);
 logp(reg) = y.*log(x) + (1-y).*log(1-x);
-yhat(reg) = y.*(x) + (1-y).*(1-x);
+yhat(reg) = y.*(x) + (1-y).*(1-x); % not fully sure this is correct. may want to just exponentiate log probs instead
 res(reg) = (y-x)./sqrt(x.*(1-x));
 
 return;

@@ -44,8 +44,8 @@ for subject in subjects:
     # if i == 10:
     #     break
     # i = i + 1
-    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_responses_prolific_7-23-24 "false" "r" "prolific" "tapas_hgf_binary_config" "tapas_condhalluc_obs2_config_CMG"
-    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_predictions_prolific_7-23-24 "false" "p" "prolific" "tapas_hgf_binary_config" "tapas_unitsq_sgm_config"
+    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_responses_prolific_8-8-24 "false" "r" "prolific" "tapas_hgf_binary_config" "tapas_condhalluc_obs2_config_CMG"
+    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_predictions_prolific_8-8-24 "false" "p" "prolific" "tapas_hgf_binary_config" "tapas_unitsq_sgm_config"
 
 
     ## joblist | grep HGF | grep -Po 98.... | xargs scancel
