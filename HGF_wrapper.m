@@ -16,7 +16,7 @@ if ispc
     elseif experiment_mode == "mturk"
         subject = 'AM0JKZVOEOTMA';   % Mturk Subject ID (others AM0JKZVOEOTMA, A1IZ4NX41GKU4X, A1Q7VWUBIJOK17)
     elseif experiment_mode == "prolific"
-        subject = '5590a34cfdf99b729d4f69dc'; %  5590a34cfdf99b729d4f69dc or 55bcd160fdf99b1c4e4ae632 or 6556a01177d7a552a0819714 or 65f335ba737e19c6aad352aa or 6682adb6c4cc2cb1c1fc7f58
+        subject = '5a5ec79cacc75b00017aa095'; %  5590a34cfdf99b729d4f69dc or 55bcd160fdf99b1c4e4ae632 or 6556a01177d7a552a0819714 or 65f335ba737e19c6aad352aa or 6682adb6c4cc2cb1c1fc7f58
     end
     perception_model = 'tapas_hgf_binary_config';       
     observation_model = 'tapas_unitsq_sgm_config'; %tapas_unitsq_sgm_config or tapas_condhalluc_obs2_config_CMG
@@ -259,11 +259,10 @@ for k=1:length(index_array)
             % REACTION TIMES
             
             %% IMPUTE RTs of .800 FOR MISSED TRIALS
-            
-            resp_table.response_time(isnan(resp_table.response_time)) = 0.800;
-            
-            
+         
             resp_table.response_time = str2double(resp_table.response_time);
+            resp_table.response_time(isnan(resp_table.response_time)) = 0.800;
+
             sub_table.rt_sad_high_expected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high')));
             sub_table.rt_sad_high_expected_low_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high')));
             sub_table.rt_sad_high_unexpected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_high')));
@@ -283,9 +282,6 @@ for k=1:length(index_array)
             
             
             
-            % PREDICTIONS
-            sub_table.p_cor_high =  sum(strcmp(predict_table.trial_type, 'angry_high') | strcmp(predict_table.trial_type, 'sad_high'));
-            sub_table.p_cor_low =  sum(strcmp(predict_table.trial_type, 'angry_low') | strcmp(predict_table.trial_type, 'sad_low'));
             
             if experiment_mode == "inperson"
                 % register missed trials and trial_type. Note this is 1-indexed
@@ -324,7 +320,7 @@ for k=1:length(index_array)
            
 
            %save([res_dir '/output_' model '_' 'cb' cb '_' subject], 'sub_table');
-           writetable(struct2table(sub_table), [res_dir '/faces_' subject '_T' num2str(run) '_cb' cb '_' model '_' p_or_r '_fits.csv'])
+           writetable(struct2table(sub_table), [res_dir '/faces_' subject '_T' num2str(run) '_cb' cb '_' p_or_r '_fits.csv'])
            saveas(gcf, [res_dir '/faces_' subject '_T' num2str(run) '_cb' cb '_' model '_' p_or_r '_image.png']);
            clear all; close all;
            break; % break out of for loop because full file ran without error
