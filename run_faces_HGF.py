@@ -30,10 +30,14 @@ with open(subject_list_path) as infile:
         if 'record_id' or 'id' not in line:
             subjects.append(line.strip())
 
-ssub_path = '/media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/scripts/run_HGF.ssub'
+ssub_path = '/media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_HGF.ssub'
 
 # i = 0
 for subject in subjects:
+
+    if subject != "6679689a61bf2c46ebba0863":
+        continue
+
     stdout_name = f"{results}/logs/{subject}-%J.stdout"
     stderr_name = f"{results}/logs/{subject}-%J.stderr"
 
@@ -44,8 +48,8 @@ for subject in subjects:
     # if i == 10:
     #     break
     # i = i + 1
-    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_responses_prolific_8-8-24 "false" "r" "prolific" "tapas_hgf_binary_config" "tapas_condhalluc_obs2_config_CMG"
-    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_predictions_prolific_8-8-24 "false" "p" "prolific" "tapas_hgf_binary_config" "tapas_unitsq_sgm_config"
+    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_responses_prolific_1-21-25 "false" "r" "prolific" "tapas_hgf_binary_config" "tapas_condhalluc_obs2_config_CMG"
+    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_predictions_prolific_8-8-24 "false" "p" "prolific" "tapas_hgf_binary_config" "tapas_unitsq_sgm_config"
 
 
     ## joblist | grep HGF | grep -Po 98.... | xargs scancel

@@ -16,7 +16,7 @@ if ispc
     elseif experiment_mode == "mturk"
         subject = 'AM0JKZVOEOTMA';   % Mturk Subject ID (others AM0JKZVOEOTMA, A1IZ4NX41GKU4X, A1Q7VWUBIJOK17)
     elseif experiment_mode == "prolific"
-        subject = '5a5ec79cacc75b00017aa095'; %  5590a34cfdf99b729d4f69dc or 55bcd160fdf99b1c4e4ae632 or 6556a01177d7a552a0819714 or 65f335ba737e19c6aad352aa or 6682adb6c4cc2cb1c1fc7f58
+        subject = '5590a34cfdf99b729d4f69dc'; %  5590a34cfdf99b729d4f69dc or 55bcd160fdf99b1c4e4ae632 or 6556a01177d7a552a0819714 or 65f335ba737e19c6aad352aa or 6682adb6c4cc2cb1c1fc7f58
     end
     perception_model = 'tapas_hgf_binary_config';       
     observation_model = 'tapas_unitsq_sgm_config'; %tapas_unitsq_sgm_config or tapas_condhalluc_obs2_config_CMG
@@ -110,8 +110,17 @@ for k=1:length(index_array)
     try
         
         if run_script==1
+            %str_run = 'dont fit just process behavior';
+            str_run = '';
+            [x, file_table, processed_table] = hgf_function(str_run, raw, rt_model, p_or_r, cb, experiment_mode,perception_model,observation_model);
+            if strcmp(str_run, 'dont fit just process behavior')
+                processed_table.Properties.VariableNames = ["trial_number", "response", "observed","intensity"];
+                writetable(processed_table, [res_dir '/task_data_' subject '_responses.csv'])
 
-            [x, file_table] = hgf_function(str_run, raw, rt_model, p_or_r, cb, experiment_mode,perception_model,observation_model);
+            end
+            %%
+            
+            
             if show_plot
                 if strcmp(observation_model,'tapas_condhalluc_obs2_config_CMG')
                      tapas_hgf_binary_condhalluc_plotTraj(x)
@@ -197,131 +206,24 @@ for k=1:length(index_array)
                 sub_table.variance = var(x.optim.action_probs(~isnan(x.optim.action_probs)));
             end
             % MODEL FREE
-            
-            % Add schedule to get intensity/expectation for each trial
-            schedule = readtable([root 'rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/schedules/emotional_faces_CB1_schedule_claire.csv']);
-            schedule_cb = readtable([root 'rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/schedules/emotional_faces_CB2_schedule_claire.csv']);
-            if cb == "1" 
-                resp_table.intensity = schedule.intensity;
-                resp_table.expectation = schedule.expectation;
-                resp_table.prob_hightone_sad = schedule.prob_hightone_sad;
-            else
-                resp_table.intensity = schedule_cb.intensity;
-                resp_table.expectation = schedule_cb.expectation;
-                resp_table.prob_hightone_sad = schedule_cb.prob_hightone_sad;
-            end
-            
-            
-            
             sub_table.has_practice_effects = has_practice_effects;
             %sub_table.model = model;
             sub_table.p_or_r = p_or_r;
-            sub_table.cor_trials =  sum(strcmp(resp_table.result, 'correct'));
             
-            
-            % RESPONSES
-            matching_rows = strcmp(resp_table.result, 'correct');
-            sub_table.r_cor_sad_high_expected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.r_cor_sad_high_expected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.r_cor_sad_high_unexpected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.r_cor_sad_high_unexpected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.r_cor_sad_low_expected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.r_cor_sad_low_expected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.r_cor_sad_low_unexpected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.r_cor_sad_low_unexpected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.r_cor_angry_high_expected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.r_cor_angry_high_expected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.r_cor_angry_high_unexpected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.r_cor_angry_high_unexpected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.r_cor_angry_low_expected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_low'));
-            sub_table.r_cor_angry_low_expected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_low'));
-            sub_table.r_cor_angry_low_unexpected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_low'));
-            sub_table.r_cor_angry_low_unexpected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_low'));
-            
-            sub_table.num_sad_high_expected_high_intensity = sum(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.num_sad_high_expected_low_intensity = sum(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.num_sad_high_unexpected_high_intensity = sum(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.num_sad_high_unexpected_low_intensity = sum(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.num_sad_low_expected_high_intensity = sum(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.num_sad_low_expected_low_intensity = sum(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.num_sad_low_unexpected_high_intensity = sum(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.num_sad_low_unexpected_low_intensity = sum(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.num_angry_high_expected_high_intensity = sum(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.num_angry_high_expected_low_intensity = sum(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.num_angry_high_unexpected_high_intensity = sum(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.num_angry_high_unexpected_low_intensity = sum(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.num_angry_low_expected_high_intensity = sum(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_low'));
-            sub_table.num_angry_low_expected_low_intensity = sum(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_low'));
-            sub_table.num_angry_low_unexpected_high_intensity = sum(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_low'));
-            sub_table.num_angry_low_unexpected_low_intensity = sum(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_low'));         
-            
-
-            % REACTION TIMES
-            
-            %% IMPUTE RTs of .800 FOR MISSED TRIALS
-         
-            resp_table.response_time = str2double(resp_table.response_time);
-            resp_table.response_time(isnan(resp_table.response_time)) = 0.800;
-
-            sub_table.rt_sad_high_expected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high')));
-            sub_table.rt_sad_high_expected_low_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high')));
-            sub_table.rt_sad_high_unexpected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_high')));
-            sub_table.rt_sad_high_unexpected_low_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_high')));
-            sub_table.rt_sad_low_expected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_low')));
-            sub_table.rt_sad_low_expected_low_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_low')));
-            sub_table.rt_sad_low_unexpected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_low')));
-            sub_table.rt_sad_low_unexpected_low_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_low')));
-            sub_table.rt_angry_high_expected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_high')));
-            sub_table.rt_angry_high_expected_low_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_high')));
-            sub_table.rt_angry_high_unexpected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_high')));
-            sub_table.rt_angry_high_unexpected_low_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_high')));
-            sub_table.rt_angry_low_expected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_low')));
-            sub_table.rt_angry_low_expected_low_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_low')));
-            sub_table.rt_angry_low_unexpected_high_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_low')));
-            sub_table.rt_angry_low_unexpected_low_intensity = nanmean(resp_table.response_time(strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_low')));     
-            
-            
-            
-            
-            if experiment_mode == "inperson"
-                % register missed trials and trial_type. Note this is 1-indexed
-                for i=predict_table.trial_number'
-                    if (~any(resp_table.trial_number == i))
-                        missing_trial_type{i+1} = predict_table.trial_type{i+1};
-                    else
-                        missing_trial_type{i+1} = nan;
-                    end
-                end
+            model_free_struct = faces_model_free(root,cb, experiment_mode,resp_table,predict_table);
+            mf_fields = fieldnames(model_free_struct);
+            for i = 1:numel(mf_fields)
+               if isfield(sub_table, model_free_struct.(mf_fields{i}))
+                   error("Tried to write over a field in sub_table!!");
+               else
+                   sub_table.(mf_fields{i}) = model_free_struct.(mf_fields{i});
+               end
             end
-
-            if experiment_mode == "mturk" | experiment_mode=="prolific"
-                missing_trial_type = resp_table.trial_type(strcmp(resp_table.result, 'too slow sad') | strcmp(resp_table.result, 'too slow angry'));
-            end
-            
-            matching_rows = strcmp(resp_table.result, 'too slow sad') | strcmp(resp_table.result, 'too slow angry');
-            sub_table.r_missed_sad_high_expected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.r_missed_sad_high_expected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.r_missed_sad_high_unexpected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.r_missed_sad_high_unexpected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_high'));
-            sub_table.r_missed_sad_low_expected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.r_missed_sad_low_expected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.r_missed_sad_low_unexpected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.r_missed_sad_low_unexpected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'sad_low'));
-            sub_table.r_missed_angry_high_expected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.r_missed_angry_high_expected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.r_missed_angry_high_unexpected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.r_missed_angry_high_unexpected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_high'));
-            sub_table.r_missed_angry_low_expected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_low'));
-            sub_table.r_missed_angry_low_expected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 1 & strcmp(resp_table.trial_type, 'angry_low'));
-            sub_table.r_missed_angry_low_unexpected_high_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'high') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_low'));
-            sub_table.r_missed_angry_low_unexpected_low_intensity = sum(matching_rows & strcmp(resp_table.intensity, 'low') & resp_table.expectation == 0 & strcmp(resp_table.trial_type, 'angry_low'));
-            
-            
            
 
            %save([res_dir '/output_' model '_' 'cb' cb '_' subject], 'sub_table');
            writetable(struct2table(sub_table), [res_dir '/faces_' subject '_T' num2str(run) '_cb' cb '_' p_or_r '_fits.csv'])
-           saveas(gcf, [res_dir '/faces_' subject '_T' num2str(run) '_cb' cb '_' model '_' p_or_r '_image.png']);
+           saveas(gcf, [res_dir '/faces_' subject '_T' num2str(run) '_cb' cb '_' perception_model '_' observation_model '_' p_or_r '_image.png']);
            clear all; close all;
            break; % break out of for loop because full file ran without error
         end
