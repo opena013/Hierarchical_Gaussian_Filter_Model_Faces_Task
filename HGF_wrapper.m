@@ -4,15 +4,14 @@ dbstop if error
 if ispc
     root = 'L:/';    
     run = '1';   % MTurk Session 1,2,3
-    res_dir = 'L:/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific';
+    res_dir = 'L:/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_local/test';
     rt_model = false;
     p_or_r = 'r'; %prediction or responses (for binary hgf) - p=prediction, r=responses
-   % cb = '2'; %counterbalance order
     show_plot = true;
     % for experiment mode, specify if mturk, stimtool, or inperson
-    experiment_mode = "prolific";
+    experiment_mode = "inperson";
     if experiment_mode == "inperson"
-        subject = 'BW281';   % inperson Subject ID
+        subject = 'AA111';   % inperson Subject ID
     elseif experiment_mode == "mturk"
         subject = 'AM0JKZVOEOTMA';   % Mturk Subject ID (others AM0JKZVOEOTMA, A1IZ4NX41GKU4X, A1Q7VWUBIJOK17)
     elseif experiment_mode == "prolific"
@@ -23,13 +22,12 @@ if ispc
 
 elseif isunix 
     root = '/media/labs/';
-    subject = getenv('SUBJECT'); 
+    subject = getenv('SUBJECT') 
     run = getenv('RUN');   
-    res_dir = getenv('RESULTS');
-    rt_model = strcmp(getenv('MODEL'), 'true');
-    p_or_r = getenv('PREDICTION'); 
-  %  cb = getenv('COUNTERBALANCE');
-    experiment_mode = getenv('EXPERIMENT');
+    res_dir = getenv('RESULTS')
+    rt_model = strcmp(getenv('MODEL'), 'true')
+    p_or_r = getenv('PREDICTION')
+    experiment_mode = getenv('EXPERIMENT')
     show_plot = false;
     
     perception_model = getenv('PERCEPTION_MODEL');
@@ -58,6 +56,7 @@ elseif (experiment_mode == "inperson")
     file_path = [root 'rsmith/wellbeing/data/raw/sub-' subject];
     directory = dir(file_path);
     index_array = find(arrayfun(@(n) contains(directory(n).name, {'EF_R2', 'EF_R1'}),1:numel(directory)));
+
 elseif (experiment_mode == "prolific")
     file_paths = {[root 'NPC/DataSink/StimTool_Online/WB_Emotional_Faces'], [root 'NPC/DataSink/StimTool_Online/WB_Emotional_Faces_CB']};
     for k = 1:length(file_paths)
@@ -93,6 +92,18 @@ end
 
 for k=1:length(index_array)
     raw = readtable([file_path '/' directory(index_array(k)).name]);
+    % Add a trial column for inperson (because it's currently called
+    % trial_number)
+    % Assign the value of cb based on the file name (EF_R1 corresponds to
+    % cb1 and EF_R2 corresponds to cb2)
+    if strcmp(experiment_mode,"inperson")
+        raw.trial = raw.trial_number;
+        if contains(directory(index_array(k)).name,"EF_R1")
+            cb = '1';
+        elseif contains(directory(index_array(k)).name,"EF_R2")
+            cb = '2';
+        end
+    end
     if any(cellfun(@(x) isequal(x, 'MAIN'), raw.trial_type)) && (max(raw.trial)<199)
         has_practice_effects = true;
     end
@@ -103,9 +114,7 @@ for k=1:length(index_array)
     else 
         run_script=1;
     end
-    if experiment_mode == "inperson"
-        raw.trial = raw.trial_number;
-    end
+
 
     try
         
@@ -138,10 +147,35 @@ for k=1:length(index_array)
                 resp_table.trial_number = resp_table.trial;
             elseif experiment_mode == "inperson"
                 % note that these are zero indexed
-                resp_index = find(file_table.event_code==8);
+                resp_index = find(file_table.event_code==9);
                 resp_table = file_table(resp_index,:);
+
                 predict_index = find(file_table.event_code==6);
                 predict_table = file_table(predict_index,:);
+                
+                for i=resp_table.trial_number'
+                    trial_type = file_table(file_table.trial_number == i & file_table.event_code == 11,:).trial_type(1);
+                    resp_table(resp_table.trial_number == i, :).trial_type = trial_type;
+
+                    % if the person did missed this trial, fill in
+                    % absolute/response time
+                    if isempty(file_table(file_table.trial_number == i & file_table.event_code == 8,:))
+                        resp_table(resp_table.trial_number == i, :).absolute_time = 999999999999;
+                        resp_table(resp_table.trial_number == i, :).response_time = {'NA'};
+                    else
+                        absolute_time = file_table(file_table.trial_number == i & file_table.event_code == 8,:).absolute_time(1);
+                        resp_table(resp_table.trial_number == i, :).absolute_time = absolute_time;
+                        response_time = file_table(file_table.trial_number == i & file_table.event_code == 8,:).response_time(1);
+                        resp_table(resp_table.trial_number == i, :).response_time = response_time;
+                        choice = file_table(file_table.trial_number == i & file_table.event_code == 8,:).response(1);
+                        resp_table(resp_table.trial_number == i, :).response = choice;
+                        result = file_table(file_table.trial_number == i & file_table.event_code == 8,:).result(1);
+                        resp_table(resp_table.trial_number == i, :).result = result;
+
+
+                    end
+
+                end
                 for i=resp_table.trial_number'
                     trial_type = file_table(file_table.trial_number == i & file_table.event_code == 11,:).trial_type(1);
                     resp_table(resp_table.trial_number == i, :).trial_type = trial_type;
@@ -229,8 +263,13 @@ for k=1:length(index_array)
         end
     catch e
         fprintf("Behavioral file caused script to error for %s\n", subject);
-        disp(e);
+        fprintf("Error message: %s\n", e.message);
+        for k = 1:length(e.stack)
+            fprintf("Error in %s at line %d\n", e.stack(k).name, e.stack(k).line);
+        end
+        disp(e); % Still useful to display the full error object
         clear all; close all;
     end
+
 end
 %tapas_hgf_binary_plotTraj(x)

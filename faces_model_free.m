@@ -3,7 +3,7 @@ function sub_table = faces_model_free(root, cb, experiment_mode, resp_table, pre
    % Add schedule to get intensity/expectation for each trial
             schedule = readtable([root 'rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/schedules/emotional_faces_CB1_schedule_claire.csv']);
             schedule_cb = readtable([root 'rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/schedules/emotional_faces_CB2_schedule_claire.csv']);
-            if cb == "1" 
+            if strcmp(cb, "1")
                 resp_table.intensity = schedule.intensity;
                 resp_table.expectation = schedule.expectation;
                 resp_table.prob_hightone_sad = schedule.prob_hightone_sad;

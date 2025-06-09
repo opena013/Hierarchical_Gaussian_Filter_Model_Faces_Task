@@ -1,12 +1,14 @@
 #!/bin/bash
 #
-#SBATCH --partition=c3_short
+#SBATCH --partition=c3
 #SBATCH --ntasks=1
 #SBATCH --mem=12000
 #SBATCH --nodes=1
 #SBATCH --chdir=/media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/
 #SBATCH --begin=now
 #SBATCH --job-name=HGF-fit
+#SBATCH --time=00:15:00
+
 #
 #################################################
 

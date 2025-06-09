@@ -1,15 +1,23 @@
 import sys, os, re, subprocess
+from datetime import datetime
 
-subject_list_path = '/media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/emotional_faces_prolific_IDs.csv'
+
 run = '1' # irrelevant for inperson
 counterbalance = '2' # irrelevant for inperson
-results = sys.argv[1]
+base_results = sys.argv[1]
 model = sys.argv[2] # true if RT model
 prediction = sys.argv[3] # indicate p or r for prediction or response
 experiment_mode = sys.argv[4] # indicate inperson, mturk, or prolific
 perception_model = sys.argv[5] # indicate perceptual model to fit
 observation_model = sys.argv[6]  # indicate observation model to fit
 
+timestamp = datetime.now().strftime('%m-%d-%y-%H_%M_%S')
+results = f"{base_results}_{timestamp}"
+
+if experiment_mode == 'inperson':
+    subject_list_path = '/media/labs/rsmith/lab-members/cgoldman/Wellbeing/local/local_wellbeing_IDs.csv'
+elif experiment_mode == 'prolific':
+    subject_list_path = '/media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/emotional_faces_prolific_IDs.csv'
 
 if model == 'false':
     model_name = 'binary'
@@ -29,14 +37,13 @@ with open(subject_list_path) as infile:
     for line in infile:
         if 'record_id' or 'id' not in line:
             subjects.append(line.strip())
-
 ssub_path = '/media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_HGF.ssub'
 
 # i = 0
 for subject in subjects:
 
-    if subject != "6679689a61bf2c46ebba0863":
-        continue
+    # if subject != "6679689a61bf2c46ebba0863":
+    #     continue
 
     stdout_name = f"{results}/logs/{subject}-%J.stdout"
     stderr_name = f"{results}/logs/{subject}-%J.stderr"
@@ -48,8 +55,10 @@ for subject in subjects:
     # if i == 10:
     #     break
     # i = i + 1
-    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_responses_prolific_1-21-25 "false" "r" "prolific" "tapas_hgf_binary_config" "tapas_condhalluc_obs2_config_CMG"
-    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_predictions_prolific_8-8-24 "false" "p" "prolific" "tapas_hgf_binary_config" "tapas_unitsq_sgm_config"
+    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_responses_prolific "false" "r" "prolific" "tapas_hgf_binary_config" "tapas_condhalluc_obs2_config_CMG"
+    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_predictions_prolifi "false" "p" "prolific" "tapas_hgf_binary_config" "tapas_unitsq_sgm_config"
+
+    ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_local/hgf_no_rt_responses_local "false" "r" "inperson" "tapas_hgf_binary_config" "tapas_condhalluc_obs2_config_CMG"
 
 
     ## joblist | grep HGF | grep -Po 98.... | xargs scancel
