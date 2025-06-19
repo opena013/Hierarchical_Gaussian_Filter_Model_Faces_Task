@@ -1,6 +1,10 @@
 %% HGF Wrapper Function, 2023
 clear all 
 dbstop if error
+
+
+str_run = 'dont fit just process behavior'; % set this to '' or 'dont fit just process behavior'
+
 if ispc
     root = 'L:/';    
     run = '1';   % MTurk Session 1,2,3
@@ -41,12 +45,6 @@ observation_model
 
 addpath('./HGF/')
 
-
-if run==1 || run=='1'
-    str_run=[];
-else
-    str_run = num2str(run);
-end
 
 if (experiment_mode == "mturk")
     file_path = [root 'NPC/DataSink/StimTool_Online/WBMTURK_Emotional_FacesCB' cb];
@@ -119,18 +117,10 @@ for k=1:length(index_array)
     try
         
         if run_script==1
-            %str_run = 'dont fit just process behavior';
-            str_run = '';
             [x, file_table, processed_table] = hgf_function(str_run, raw, rt_model, p_or_r, cb, experiment_mode,perception_model,observation_model);
-            if strcmp(str_run, 'dont fit just process behavior')
-                processed_table.Properties.VariableNames = ["trial_number", "response", "observed","intensity"];
-                writetable(processed_table, [res_dir '/task_data_' subject '_responses.csv'])
-
-            end
-            %%
             
             
-            if show_plot
+            if show_plot & ~strcmp(str_run,'dont fit just process behavior')
                 if strcmp(observation_model,'tapas_condhalluc_obs2_config_CMG')
                      tapas_hgf_binary_condhalluc_plotTraj(x)
                 else
@@ -184,8 +174,54 @@ for k=1:length(index_array)
                     trial_type = file_table(file_table.trial_number == i & file_table.event_code == 11,:).trial_type(1);
                     predict_table(predict_table.trial_number == i, :).trial_type = trial_type;
                 end
-
             end
+
+            if strcmp(str_run, 'dont fit just process behavior')
+                % Build the processed behavioral file for subsequent
+                % analysis or fitting in RxInfer
+                % Extract these columns from the responses table
+                resp_cols={'trial_number','trial_type','absolute_time','response_time','response','result'};
+                % Extract these columns from the predictions table
+                pred_cols={'absolute_time','response_time','response','result'};
+                
+                % Rename overlapping columns with prefixes
+                rename={'absolute_time','response_time','response','result'};
+                for i=1:length(rename)
+                  resp_table.Properties.VariableNames{strcmp(resp_table.Properties.VariableNames,rename{i})}=['resp_' rename{i}];
+                  predict_table.Properties.VariableNames{strcmp(predict_table.Properties.VariableNames,rename{i})}=['pred_' rename{i}];
+                end
+                
+                % Update column names after renaming
+                resp_cols_prefixed={'trial_number','trial_type','resp_absolute_time','resp_response_time','resp_response','resp_result'};
+                pred_cols_prefixed={'pred_absolute_time','pred_response_time','pred_response','pred_result'};
+                
+                % Combine into one table
+                combined_table=[resp_table(:,resp_cols_prefixed),predict_table(:,pred_cols_prefixed)];
+
+                % Define trial types as type1 (expected; sad-high or
+                % angry-low) vs type2 (unexpected; sad-low or angry-high)
+                type1=ismember(combined_table.trial_type,{'sad_high','angry_low'});
+                type2=ismember(combined_table.trial_type,{'sad_low','angry_high'});
+                
+                % Use the result column to determine if the subject thought
+                % the trial was type1 or type2
+                combined_table.pred_sad_high_or_angry_low=double((strcmp(combined_table.pred_result,'correct') & type1) | ...
+                                                                 (strcmp(combined_table.pred_result,'incorrect') & type2));
+                
+                % Make sure too slow responses are coded as NaN
+                resp_result=combined_table.resp_result;
+                resp_logic=(strcmp(resp_result,'correct') & type1) | (strcmp(resp_result,'incorrect') & type2);
+                too_slow=contains(resp_result,'too slow');
+                combined_table.resp_sad_high_or_angry_low=nan(height(combined_table),1);
+                combined_table.resp_sad_high_or_angry_low(~too_slow)=double(resp_logic(~too_slow));
+                % Record if the subject observed type1 or type2
+                combined_table.observed_sad_high_or_angry_low = ismember(combined_table.trial_type, {'sad_high','angry_low'});
+                % Record the intensity of the face
+                combined_table.face_intensity = processed_table.trial_prediction;
+                writetable(combined_table, [res_dir '/task_data_' subject '_processed_data.csv'])
+                return;
+            end
+
             if rt_model
                 %model = 'rt-HGF';
 

@@ -49,8 +49,8 @@ stim_inputs=[];
 % means sad
 j=0;
 for i = 1:200
+    j=j+1;
     if ~ismember(i-1, missingtrials)
-        j=j+1;
         if strcmp(table(table.trial==i-1,:).response{1},"left")&&strcmp(extractAfter(stims.trial_type{j}, '_'), 'high')||...
                 strcmp(table(table.trial==i-1,:).response{1},"right")&&strcmp(extractAfter(stims.trial_type{j}, '_'), 'low')
             responses = [responses 0];
