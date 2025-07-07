@@ -3,7 +3,7 @@ clear all
 dbstop if error
 
 
-str_run = 'dont fit just process behavior'; % set this to '' or 'dont fit just process behavior'
+str_run = ''; % set this to '' or 'dont fit just process behavior'
 
 if ispc
     root = 'L:/';    
