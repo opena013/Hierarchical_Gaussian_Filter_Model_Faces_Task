@@ -62,7 +62,7 @@ for subject in subjects:
     ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/hgf_no_rt_predictions_prolific "false" "p" "prolific" "tapas_hgf_binary_config" "tapas_unitsq_sgm_config"
 
 
-#### DO NOT RUN SCRIPTS BELOW UNLESS PROCESSING DATA
+#### DO NOT RUN SCRIPTS BELOW UNLESS PROCESSING DATA (will have to set str_run to 'dont fit just process behavior' in the main matlab file)
     ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_local/local_emotional_faces_processed_data "false" "r" "inperson" "tapas_hgf_binary_config" "tapas_condhalluc_obs2_config_CMG"
     ###python3 /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/VB_scripts/run_faces_HGF.py  /media/labs/rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/model_output_prolific/prolific_emotional_faces_processed_data "false" "r" "prolific" "tapas_hgf_binary_config" "tapas_condhalluc_obs2_config_CMG"
 
