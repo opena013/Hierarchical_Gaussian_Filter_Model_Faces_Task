@@ -30,7 +30,7 @@ end
 
         response = processed_table.response;
         if strcmp(observation_model,'tapas_condhalluc_obs2_config') || strcmp(observation_model,'tapas_condhalluc_obs2_config_CMG')
-            input = table2array(processed_table(:, {'observed', 'trial_prediction'}));
+            input = table2array(processed_table(:, {'observed', 'face_intensity'}));
         else
             input = processed_table.observed;
         end

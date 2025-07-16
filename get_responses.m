@@ -75,26 +75,26 @@ else
     schedule = readtable([root 'rsmith/lab-members/cgoldman/Wellbeing/emotional_faces/schedules/emotional_faces_CB2_schedule_claire.csv']);
 end
 
-trial_prediction = nan(1,200);
+face_intensity = nan(1,200);
 % assign a 1 for high intensity congruent response, .75 for low intensity
 % congruent response, .25 for low intensity incongruent, 0 for high
 % intensity incongruent
 for(i=1:200)
     if strcmp(schedule.intensity{i}, 'high')
         if (stim_inputs(i)==1)
-            trial_prediction(i) = 1;
+            face_intensity(i) = 1;
         else
-            trial_prediction(i) = 0;
+            face_intensity(i) = 0;
         end
     else
         if (stim_inputs(i)==1)
-            trial_prediction(i) = .75;
+            face_intensity(i) = .75;
         else
-            trial_prediction(i) = .25;
+            face_intensity(i) = .25;
         end
     end
 end
 
 
-r_table = array2table(horzcat([0:199]', responses', stim_inputs',trial_prediction'));
-r_table.Properties.VariableNames = ["trial_number", "response", "observed","trial_prediction"];
+r_table = array2table(horzcat([0:199]', responses', stim_inputs',face_intensity'));
+r_table.Properties.VariableNames = ["trial_number", "response", "observed","face_intensity"];

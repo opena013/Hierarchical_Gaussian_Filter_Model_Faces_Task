@@ -3,7 +3,7 @@ clear all
 dbstop if error
 
 
-str_run = ''; % set this to '' or 'dont fit just process behavior'
+str_run = 'dont fit just process behavior'; % set this to '' or 'dont fit just process behavior'
 
 if ispc
     root = 'L:/';    
@@ -13,7 +13,7 @@ if ispc
     p_or_r = 'r'; %prediction or responses (for binary hgf) - p=prediction, r=responses
     show_plot = true;
     % for experiment mode, specify if mturk, stimtool, or inperson
-    experiment_mode = "inperson";
+    experiment_mode = "prolific";
     if experiment_mode == "inperson"
         subject = 'AA111';   % inperson Subject ID
     elseif experiment_mode == "mturk"
@@ -131,6 +131,7 @@ for k=1:length(index_array)
             if experiment_mode == "mturk" | experiment_mode == "prolific"
                 resp_index = find(file_table.event_type==6)+1;
                 resp_table = file_table(resp_index,:);
+                resp_table.score = file_table(find(file_table.event_type==9),:).response;
                 predict_index = find(file_table.event_type==12);
                 predict_table = file_table(predict_index,:);
                 predict_table.trial_number = predict_table.trial;
@@ -139,6 +140,7 @@ for k=1:length(index_array)
                 % note that these are zero indexed
                 resp_index = find(file_table.event_code==9);
                 resp_table = file_table(resp_index,:);
+                resp_table.score = resp_table.response;
 
                 predict_index = find(file_table.event_code==6);
                 predict_table = file_table(predict_index,:);
@@ -180,7 +182,7 @@ for k=1:length(index_array)
                 % Build the processed behavioral file for subsequent
                 % analysis or fitting in RxInfer
                 % Extract these columns from the responses table
-                resp_cols={'trial_number','trial_type','absolute_time','response_time','response','result'};
+                resp_cols={'trial_number','trial_type','absolute_time','response_time','response','result', 'score'};
                 % Extract these columns from the predictions table
                 pred_cols={'absolute_time','response_time','response','result'};
                 
@@ -192,7 +194,7 @@ for k=1:length(index_array)
                 end
                 
                 % Update column names after renaming
-                resp_cols_prefixed={'trial_number','trial_type','resp_absolute_time','resp_response_time','resp_response','resp_result'};
+                resp_cols_prefixed={'trial_number','trial_type','resp_absolute_time','resp_response_time','resp_response','resp_result', 'score'};
                 pred_cols_prefixed={'pred_absolute_time','pred_response_time','pred_response','pred_result'};
                 
                 % Combine into one table
@@ -217,7 +219,7 @@ for k=1:length(index_array)
                 % Record if the subject observed type1 or type2
                 combined_table.observed_sad_high_or_angry_low = ismember(combined_table.trial_type, {'sad_high','angry_low'});
                 % Record the intensity of the face
-                combined_table.face_intensity = processed_table.trial_prediction;
+                combined_table.face_intensity = processed_table.face_intensity;
                 writetable(combined_table, [res_dir '/task_data_' subject '_processed_data.csv'])
                 return;
             end
